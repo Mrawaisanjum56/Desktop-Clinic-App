@@ -1,0 +1,8 @@
+# clinic_app_v5 — requirements
+# Install: pip install -r requirements.txt
+
+customtkinter>=5.2.0
+reportlab>=4.0.0
+Pillow>=10.0.0
+pyinstaller>=6.0.0
+python-dateutil>=2.8.0   # needed for billing_manager monthly summary
