@@ -1,8 +1,27 @@
-# clinic_app_v5 — requirements
-# Install: pip install -r requirements.txt
+# clinic_app_v6 — requirements
+# Install:  pip install -r requirements.txt
+#
+# On some Linux distributions pip needs --break-system-packages, e.g.:
+#   pip install -r requirements.txt --break-system-packages
 
-customtkinter>=5.2.0
-reportlab>=4.0.0
-Pillow>=10.0.0
-pyinstaller>=6.0.0
-python-dateutil>=2.8.0   # needed for billing_manager monthly summary
+customtkinter>=5.2.0        # GUI framework (main app + login screen)
+Pillow>=10.0.0               # image handling — logo on login screen & PDFs
+reportlab>=4.0.0              # PDF generation (bills, prescriptions)
+python-dateutil>=2.8.0        # needed for billing_manager monthly summary
+pyinstaller>=6.0.0            # optional — only needed to build a .exe
+
+# NEW in v6
+mysql-connector-python>=8.0.33   # MySQL database driver
+bcrypt>=4.0.0                     # password hashing for the login system
+
+# NOT a pip package — also required, installed separately:
+#   MySQL Server 8.0+ (or MariaDB 10.5+), running locally or reachable
+#   over the network. See README.md "Database setup" for install links.
+#   The MySQL *client* tools (specifically `mysqldump`) must also be on
+#   your PATH for the automatic backup feature to work — these are
+#   normally installed alongside MySQL Server.
+#
+#   On Linux, tkinter (which customtkinter builds on) is part of Python
+#   but is packaged separately by the OS and is NOT installed by pip:
+#     sudo apt install python3-tk
+#   Windows and macOS python.org installers already include it.

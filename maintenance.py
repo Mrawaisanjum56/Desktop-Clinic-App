@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from db.database import (
-    check_integrity, vacuum_database, get_db_stats, BACKUP_DIR, DB_PATH
+    check_integrity, vacuum_database, get_db_stats, BACKUP_DIR
 )
 from datetime import datetime
 
@@ -39,11 +39,11 @@ def run():
         print("      → Restore from a recent backup in the backups/ folder.")
         sys.exit(1)
 
-    # 2. VACUUM
-    print("\n[2/3] Compacting database (VACUUM)...")
-    before = DB_PATH.stat().st_size / (1024 * 1024)
+    # 2. OPTIMIZE (MySQL's equivalent of SQLite's VACUUM)
+    print("\n[2/3] Compacting database (OPTIMIZE TABLE)...")
+    before = get_db_stats()["size_mb"]
     vacuum_database()
-    after = DB_PATH.stat().st_size / (1024 * 1024)
+    after = get_db_stats()["size_mb"]
     saved = max(0, before - after)
     print(f"      ✓ Done. Size: {after:.2f} MB  (freed: {saved:.2f} MB)")
 

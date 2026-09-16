@@ -33,7 +33,7 @@ def get_all_medicines(include_deleted: bool = False) -> list:
         q = "SELECT * FROM medicines"
         if not include_deleted:
             q += " WHERE is_deleted=0"
-        q += " ORDER BY name COLLATE NOCASE"
+        q += " ORDER BY name"
         return conn.execute(q).fetchall()
     finally:
         conn.close()
@@ -54,17 +54,32 @@ def update_medicine(med_id: int, name: str, unit: str, price: float,
         conn.close()
 
 
-def deduct_stock(medicine_id: int, quantity: int):
-    """Called when a prescription is saved — reduces stock count."""
-    conn = get_connection()
+def deduct_stock(medicine_id: int, quantity: int, conn=None):
+    """
+    Called when a prescription is saved — reduces stock count.
+
+    Pass an existing `conn` (e.g. from visit_manager.save_prescriptions)
+    to run this as part of that caller's own transaction instead of
+    opening a second connection. That matters on MySQL specifically:
+    unlike SQLite, InnoDB takes a real row lock on `medicines` for the
+    FOREIGN KEY check when a prescription referencing it is inserted,
+    so a *second*, still-open connection trying to UPDATE that same
+    row before the first transaction commits will sit there until it
+    hits a "Lock wait timeout exceeded" error.
+    """
+    owns_conn = conn is None
+    if owns_conn:
+        conn = get_connection()
     try:
         conn.execute(
-            "UPDATE medicines SET stock_qty = MAX(0, stock_qty - ?) WHERE id=?",
+            "UPDATE medicines SET stock_qty = GREATEST(0, stock_qty - ?) WHERE id=?",
             (quantity, medicine_id)
         )
-        conn.commit()
+        if owns_conn:
+            conn.commit()
     finally:
-        conn.close()
+        if owns_conn:
+            conn.close()
 
 
 def delete_medicine(med_id: int):

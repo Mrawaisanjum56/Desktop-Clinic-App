@@ -20,7 +20,7 @@ _DEFAULTS = {
     "default_consultation_fee": 500,
 
     # App behaviour
-    "app_version":        "5.0",
+    "app_version":        "6.0",
     "low_stock_threshold": 10,     # alert when medicine qty <= this
     "expiry_alert_days":   30,     # alert N days before expiry
     "max_backups":         30,
@@ -28,9 +28,24 @@ _DEFAULTS = {
     # PDF output folder (relative to project root)
     "reports_output_dir":  "reports_output",
 
-    # Login
-    "pin_enabled": False,
-    "pin_hash":    "",             # bcrypt hash stored here when enabled
+    # Clinic logo (relative to project root) — shown on login screen + prescriptions
+    "clinic_logo_path": "assets/logo.png",
+
+    # ── MySQL connection ─────────────────────────────
+    # Create the database first (see README), then fill these in.
+    "db_host":     "localhost",
+    "db_port":     3306,
+    "db_user":     "root",
+    "db_password": "@Awais.56",
+    "db_name":     "clinic_app_db",
+
+    # ── Login / authentication ───────────────────────
+    "login_enabled":            True,
+    "max_login_attempts":       5,
+    "login_lockout_minutes":    2,
+
+    # Window size on launch (ui/main_window.py)
+    "window_size": "1150x760",
 }
 
 
@@ -50,3 +65,11 @@ def save(settings: dict):
 
 # Convenience: load once at import time
 CONFIG = load()
+
+# ── Backward-compatible flat constants ───────────────────────
+# ui/main_window.py (ported from clinic_app_v4) imports these directly
+# rather than reaching into the CONFIG dict. Kept as plain derived
+# values (not hardcoded) so editing clinic_config.json still updates
+# them everywhere.
+APP_TITLE   = f"{CONFIG['clinic_name']} — Management System"
+WINDOW_SIZE = CONFIG.get("window_size", "1150x760")

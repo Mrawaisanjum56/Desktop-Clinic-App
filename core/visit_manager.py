@@ -9,14 +9,20 @@ from core.medicine_manager import deduct_stock
 from datetime import datetime
 
 
-def add_visit(patient_id: int, symptoms: str,
-              diagnosis: str, notes: str) -> int:
+def add_visit(patient_id: int, symptoms: str, diagnosis: str, notes: str,
+              bp: str = "", temperature: str = "", weight: str = "") -> int:
+    """
+    bp / temperature / weight are the patient's vitals recorded at this
+    visit (e.g. bp="120/80", temperature="98.6°F", weight="70kg") and are
+    printed in the vitals section of the prescription PDF.
+    """
     conn = get_connection()
     try:
         cur = conn.execute(
-            """INSERT INTO visits (patient_id, symptoms, diagnosis, notes)
-               VALUES (?, ?, ?, ?)""",
-            (patient_id, symptoms, diagnosis, notes)
+            """INSERT INTO visits
+                   (patient_id, symptoms, diagnosis, notes, bp, temperature, weight)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (patient_id, symptoms, diagnosis, notes, bp, temperature, weight)
         )
         conn.commit()
         return cur.lastrowid
@@ -46,7 +52,7 @@ def save_prescriptions(visit_id: int, prescriptions: list[dict]):
                  rx.get("duration", ""),
                  rx.get("quantity", 1))
             )
-            deduct_stock(rx["medicine_id"], rx.get("quantity", 1))
+            deduct_stock(rx["medicine_id"], rx.get("quantity", 1), conn=conn)
 
         conn.commit()
     finally:
@@ -90,13 +96,15 @@ def get_prescriptions_for_visit(visit_id: int) -> list:
         conn.close()
 
 
-def update_visit(visit_id: int, symptoms: str, diagnosis: str, notes: str):
+def update_visit(visit_id: int, symptoms: str, diagnosis: str, notes: str,
+                 bp: str = "", temperature: str = "", weight: str = ""):
     conn = get_connection()
     try:
         conn.execute(
-            """UPDATE visits SET symptoms=?, diagnosis=?, notes=?
+            """UPDATE visits SET symptoms=?, diagnosis=?, notes=?,
+                                  bp=?, temperature=?, weight=?
                WHERE id=?""",
-            (symptoms, diagnosis, notes, visit_id)
+            (symptoms, diagnosis, notes, bp, temperature, weight, visit_id)
         )
         conn.commit()
     finally:

@@ -37,7 +37,7 @@ def get_all_patients(include_deleted: bool = False) -> list:
         query = "SELECT * FROM patients"
         if not include_deleted:
             query += " WHERE is_deleted=0"
-        query += " ORDER BY name COLLATE NOCASE"
+        query += " ORDER BY name"
         return conn.execute(query).fetchall()
     finally:
         conn.close()
@@ -66,7 +66,7 @@ def search_patients(query: str) -> list:
             """SELECT * FROM patients
                WHERE is_deleted=0
                  AND (name LIKE ? OR phone LIKE ? OR cnic LIKE ?)
-               ORDER BY name COLLATE NOCASE
+               ORDER BY name
                LIMIT 100""",
             (q, q, q)
         ).fetchall()
